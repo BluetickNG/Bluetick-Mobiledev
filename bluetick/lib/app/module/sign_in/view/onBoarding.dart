@@ -16,6 +16,8 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
   @override
   Widget build(BuildContext context) {
     const lg = 'assets/logo.png';
+    const sp3 = 'assets/splash3.png';
+    const sp2 = 'assets/splash2.png';
     return Scaffold(
         backgroundColor: AppTheme.offWhite,
         body: Stack(
@@ -65,8 +67,8 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
                 ),
                 Container(
                   child: Padding(
-                    padding:
-                        const EdgeInsets.only(top: 180, left: 50, bottom: 240),
+                    padding: const EdgeInsets.only(
+                        top: 180, left: 50, bottom: 250, right: 50),
                     child: Stack(
                       children: [
                         Align(
@@ -91,15 +93,23 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
                                   fontWeight: FontWeight.w500),
                             ),
                           ),
-                        )
+                        ),
+                        Align(
+                            alignment: AlignmentDirectional.centerEnd,
+                            child: Container(
+                              child: Image.asset(
+                                sp2,
+                                scale: 0.5,
+                              ),
+                            ))
                       ],
                     ),
                   ),
                 ),
                 Container(
                   child: Padding(
-                    padding:
-                        const EdgeInsets.only(top: 140, left: 50, bottom: 210),
+                    padding: const EdgeInsets.only(
+                        top: 140, left: 50, bottom: 250, right: 50),
                     child: Stack(
                       children: [
                         Align(
@@ -122,6 +132,15 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
                                   color: AppTheme.mainBlue,
                                   fontSize: 12,
                                   fontWeight: FontWeight.w500),
+                            ),
+                          ),
+                        ),
+                        Align(
+                          alignment: AlignmentDirectional.centerEnd,
+                          child: Container(
+                            child: Image.asset(
+                              sp3,
+                              scale: 0.6,
                             ),
                           ),
                         )
