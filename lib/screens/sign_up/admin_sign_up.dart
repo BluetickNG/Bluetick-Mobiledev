@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../components/widgets/widgets.dart';
+import 'email_verification.dart';
 
 class AdminSignUp extends StatefulWidget {
   const AdminSignUp({Key? key}) : super(key: key);
@@ -68,14 +69,15 @@ class _AdminSignUpState extends State<AdminSignUp> {
               ),
               SignUpButton(
                 textColor: AppTheme.mainBlue,
-                text: 'Confirm',
+                text: 'Continue',
                 buttonColor: AppTheme.blue2,
                 onTapButton: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => const StaffSignUp(),
-                    ),
+                        builder: (_) =>
+                            const EmailVerification() // StaffSignUp(),
+                        ),
                   );
                 },
               ),
