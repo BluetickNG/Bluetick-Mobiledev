@@ -1,23 +1,36 @@
+import 'dart:io';
+
+import 'package:bluetick/components/services/api_models/signup_api_model.dart';
+import 'package:bluetick/components/services/invsignup_services.dart';
 import 'package:bluetick/screens/home/home_tabs.dart';
 import 'package:bluetick/screens/sign_up/invitation_link.dart';
 import 'package:bluetick/components/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../components/providers/signupProvider.dart';
 import '../../components/widgets/widgets.dart';
 import '../home/co_wokers/co_wokers_home_tab.dart';
 
-class StaffSignUp extends StatefulWidget {
-  const StaffSignUp({Key? key}) : super(key: key);
 
+class StaffSignUp extends ConsumerStatefulWidget {
   @override
-  State<StaffSignUp> createState() => _StaffSignUpState();
+   ConsumerState<ConsumerStatefulWidget> createState() {
+    return StaffSignUpState();
+  }
 }
 
-class _StaffSignUpState extends State<StaffSignUp> {
+class StaffSignUpState extends ConsumerState<StaffSignUp> {
+  final TextEditingController passwordController = TextEditingController();
+  final TextEditingController confirmPasswordController = TextEditingController();
+  @override
+  void dispose(){
+    super.dispose();
+  }
   @override
   Widget build(BuildContext context) {
-    final testController = TextEditingController();
+    final invData= ModalRoute.of(context)!.settings.arguments as InvSignUpServices;
     return Scaffold(
       backgroundColor: AppTheme.darkBlue,
       appBar: AppBar(
@@ -34,7 +47,7 @@ class _StaffSignUpState extends State<StaffSignUp> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                'Welcome to SideHustle',
+                'Welcome to ${invData.link}',
                 style: GoogleFonts.montserrat(
                   fontSize: 24,
                   fontWeight: FontWeight.w500,
@@ -43,10 +56,11 @@ class _StaffSignUpState extends State<StaffSignUp> {
                 textAlign: TextAlign.center,
               ),
               Text(
-                'Abcd12300@gmail.com',
+                '${invData.email}',
                 style: GoogleFonts.montserrat(
                   fontSize: 24,
                   fontWeight: FontWeight.w400,
+
                   color: AppTheme.offWhite,
                 ),
                 textAlign: TextAlign.center,
@@ -69,32 +83,30 @@ class _StaffSignUpState extends State<StaffSignUp> {
               const SizedBox(
                 height: 20,
               ),
-              const GeneralTextField(
+              GeneralTextField(
                 hintText: 'Full Name',
                 textType: TextInputType.name,
               ),
               const SizedBox(
                 height: 25,
               ),
-              const GeneralTextField(
+              GeneralTextField(
                   hintText: 'Role', textType: TextInputType.name),
               const SizedBox(
                 height: 25,
               ),
               GeneralPasswordTextField(
-                controller: testController,
                 hintText: 'Create Password',
                 textType: TextInputType.visiblePassword,
-                showPassword: true,
+                showPassword: true, controller: passwordController,
               ),
               const SizedBox(
                 height: 25,
               ),
               GeneralPasswordTextField(
-                controller: testController,
                 hintText: 'Confirm Password',
                 textType: TextInputType.visiblePassword,
-                showPassword: true,
+                showPassword: true, controller: confirmPasswordController,
               ),
               const SizedBox(
                 height: 25,

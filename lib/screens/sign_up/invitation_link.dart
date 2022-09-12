@@ -1,22 +1,54 @@
 import 'package:bluetick/components/app_theme.dart';
+import 'package:bluetick/components/providers/signupProvider.dart';
+import 'package:bluetick/screens/home/home.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
-
+import '../../components/controller/signUpController.dart';
+import '../../components/services/invsignup_services.dart';
 import '../../components/widgets/widgets.dart';
+import '../home/home_tabs.dart';
 import 'staff_sign_up.dart';
 
-class InvitationLink extends StatefulWidget {
-  const InvitationLink({Key? key}) : super(key: key);
-
+class InvitationLink extends ConsumerStatefulWidget {
   @override
-  State<InvitationLink> createState() => _InvitationLinkState();
+  ConsumerState<ConsumerStatefulWidget> createState() {
+    return InvitationLinkState();
+  }
 }
 
-class _InvitationLinkState extends State<InvitationLink> {
+class InvitationLinkState extends ConsumerState<StaffSignUp> {
+  final TextEditingController invitationcontroller = TextEditingController();
+  final TextEditingController emailcontroller = TextEditingController();
+
+  @override
+  void dispose() {
+    invitationcontroller.dispose();
+    emailcontroller.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
+    final invData = {
+      'link': invitationcontroller.text,
+      'email': emailcontroller.text
+    };
+    final invDataT = ref.watch(invitationProvider(invData));
+
+    final invitationtextfield = GeneralTextField(
+      hintText: 'Invitation link',
+      textType: TextInputType.name,
+      controller: invitationcontroller,
+    );
+    final emailtextfield = GeneralTextField(
+      hintText: 'Email Address',
+      textType: TextInputType.emailAddress,
+      controller: emailcontroller,
+    );
+
     return Scaffold(
       backgroundColor: AppTheme.darkBlue,
       resizeToAvoidBottomInset: false,
@@ -35,16 +67,11 @@ class _InvitationLinkState extends State<InvitationLink> {
             const SizedBox(
               height: 25,
             ),
-            const GeneralTextField(
-              hintText: 'Invitation link',
-              textType: TextInputType.name,
-            ),
+            invitationtextfield,
             const SizedBox(
               height: 25,
             ),
-            const GeneralTextField(
-                hintText: 'Email Address',
-                textType: TextInputType.emailAddress),
+            emailtextfield,
             SizedBox(
               height: 62,
             ),
@@ -87,10 +114,22 @@ class _InvitationLinkState extends State<InvitationLink> {
               text: 'Continue',
               buttonColor: AppTheme.blue2,
               onTapButton: () {
-                Navigator.pushReplacement(context,
-                    MaterialPageRoute(builder: (_) {
-                  return StaffSignUp();
-                }));
+                invDataT.when(
+                    loading: () => CircularProgressIndicator(),
+                    data: (invSSdata) {
+                      final invpostrequest = SignUpController()
+                          .postData(invSSdata);
+                      Navigator.pushReplacement(context,
+                          MaterialPageRoute(settings: RouteSettings(arguments: invSSdata),
+                            builder: (_) {
+                        return StaffSignUp();
+                      },
+                          ));
+                       //or ref.watch value
+                    },
+                    error: (Object error, StackTrace? stackTrace) {
+                      return SnackBar(content: Text('Failed'),);
+                    });
               },
             ),
           ],

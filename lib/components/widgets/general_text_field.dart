@@ -32,7 +32,7 @@ class GeneralTextField extends StatelessWidget {
           color: AppTheme.blue2,
         ),
         contentPadding:
-            const EdgeInsets.symmetric(horizontal: 10, vertical: 16),
+        const EdgeInsets.symmetric(horizontal: 10, vertical: 16),
         fillColor: AppTheme.offWhite,
         filled: true,
         focusedBorder: OutlineInputBorder(

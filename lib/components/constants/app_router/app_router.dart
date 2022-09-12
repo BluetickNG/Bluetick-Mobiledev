@@ -83,14 +83,14 @@ class AppRouter {
       case AppRouter.splashScreen:
         return MaterialPageRoute(builder: (context) => const SplashScreen());
       case AppRouter.staffSignUp:
-        return MaterialPageRoute(builder: (context) => const StaffSignUp());
+        return MaterialPageRoute(builder: (context) =>  StaffSignUp());
       case AppRouter.adminSignUp:
         return MaterialPageRoute(builder: (context) => AdminSignUp());
       case AppRouter.onBoardingAnimation:
         return MaterialPageRoute(
             builder: (context) => const OnBoardingScreenAnimation());
       case AppRouter.invitationLink:
-        return MaterialPageRoute(builder: (context) => const InvitationLink());
+        return MaterialPageRoute(builder: (context) =>  InvitationLink());
       case AppRouter.forgotPassword:
         return MaterialPageRoute(builder: (context) => const ForgotPassword());
       case AppRouter.emailVerification:
@@ -195,11 +195,11 @@ class AppRouter {
     ///Sign up
 
     AppRouter.splashScreen: (context) => const SplashScreen(),
-    AppRouter.staffSignUp: (context) => const StaffSignUp(),
+    AppRouter.staffSignUp: (context) => StaffSignUp(),
     AppRouter.adminSignUp: (context) => AdminSignUp(),
     AppRouter.onBoardingAnimation: (context) =>
         const OnBoardingScreenAnimation(),
-    AppRouter.invitationLink: (context) => const InvitationLink(),
+    AppRouter.invitationLink: (context) => InvitationLink(),
     AppRouter.forgotPassword: (context) => const ForgotPassword(),
     AppRouter.emailVerification: (context) => const EmailVerification(),
 
