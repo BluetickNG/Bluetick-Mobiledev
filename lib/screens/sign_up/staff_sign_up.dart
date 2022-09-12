@@ -13,24 +13,37 @@ import '../../components/providers/signupProvider.dart';
 import '../../components/widgets/widgets.dart';
 import '../home/co_wokers/co_wokers_home_tab.dart';
 
-
 class StaffSignUp extends ConsumerStatefulWidget {
   @override
-   ConsumerState<ConsumerStatefulWidget> createState() {
+  ConsumerState<ConsumerStatefulWidget> createState() {
     return StaffSignUpState();
   }
 }
 
 class StaffSignUpState extends ConsumerState<StaffSignUp> {
+  final TextEditingController fullnameController = TextEditingController();
+  final TextEditingController roleController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  final TextEditingController confirmPasswordController = TextEditingController();
+  final TextEditingController confirmPasswordController =
+      TextEditingController();
   @override
-  void dispose(){
+  void dispose() {
+    fullnameController.dispose();
+    roleController.dispose();
+    passwordController.dispose();
+    confirmPasswordController.dispose();
     super.dispose();
   }
+
   @override
   Widget build(BuildContext context) {
-    final invData= ModalRoute.of(context)!.settings.arguments as InvSignUpServices;
+    final signDataT = ref.watch(signUpProvider({
+      'fullname': fullnameController.text,
+      'role': roleController.text,
+      'password': confirmPasswordController.text
+    }));
+    final invData =
+        ModalRoute.of(context)!.settings.arguments as InvSignUpServices;
     return Scaffold(
       backgroundColor: AppTheme.darkBlue,
       appBar: AppBar(
@@ -60,7 +73,6 @@ class StaffSignUpState extends ConsumerState<StaffSignUp> {
                 style: GoogleFonts.montserrat(
                   fontSize: 24,
                   fontWeight: FontWeight.w400,
-
                   color: AppTheme.offWhite,
                 ),
                 textAlign: TextAlign.center,
@@ -90,15 +102,15 @@ class StaffSignUpState extends ConsumerState<StaffSignUp> {
               const SizedBox(
                 height: 25,
               ),
-              GeneralTextField(
-                  hintText: 'Role', textType: TextInputType.name),
+              GeneralTextField(hintText: 'Role', textType: TextInputType.name),
               const SizedBox(
                 height: 25,
               ),
               GeneralPasswordTextField(
                 hintText: 'Create Password',
                 textType: TextInputType.visiblePassword,
-                showPassword: true, controller: passwordController,
+                showPassword: true,
+                controller: passwordController,
               ),
               const SizedBox(
                 height: 25,
@@ -106,7 +118,8 @@ class StaffSignUpState extends ConsumerState<StaffSignUp> {
               GeneralPasswordTextField(
                 hintText: 'Confirm Password',
                 textType: TextInputType.visiblePassword,
-                showPassword: true, controller: confirmPasswordController,
+                showPassword: true,
+                controller: confirmPasswordController,
               ),
               const SizedBox(
                 height: 25,
@@ -116,14 +129,16 @@ class StaffSignUpState extends ConsumerState<StaffSignUp> {
                 text: 'Confirm',
                 buttonColor: AppTheme.blue2,
                 onTapButton: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const CoWorkerHomeTab(),
-                    ),
-                  );
-                },
-              ),
+                  signDataT.when(
+                      data: (signUpData) {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const CoWorkerHomeTab(),));},
+                            error: (Object error, StackTrace? stacktrace) {},
+                            loading: () => CircularProgressIndicator());
+                      }
+                  ),
             ],
           ),
         ),
