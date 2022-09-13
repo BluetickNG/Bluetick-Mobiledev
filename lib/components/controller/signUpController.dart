@@ -52,8 +52,7 @@ class SignUpController {
     try {
       Request request =
       http.Request('POST', Uri.parse('${BASE_URL}/signup'));
-      final service = SignUpServices(signUpData.fullname, signUpData.role, signUpData.password, signUpData.confirmPassword);
-
+      final service = SignUpServices(signUpData.email, signUpData.fullname, signUpData.role, signUpData.password, signUpData.confirmPassword);
       request.body = '${service.toJson()}';
 
       http.StreamedResponse response = await request.send();

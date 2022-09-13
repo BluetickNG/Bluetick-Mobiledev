@@ -37,13 +37,17 @@ class StaffSignUpState extends ConsumerState<StaffSignUp> {
 
   @override
   Widget build(BuildContext context) {
-    final signDataT = ref.watch(signUpProvider({
-      'fullname': fullnameController.text,
-      'role': roleController.text,
-      'password': confirmPasswordController.text
-    }));
+
     final invData =
         ModalRoute.of(context)!.settings.arguments as InvSignUpServices;
+    final signUpData = ref.watch(signUpProvider({
+    'email': invData.email,
+    'fullname': fullnameController.text,
+    'role': roleController.text,
+    'password1': passwordController.text,
+      'password2': confirmPasswordController.text
+    }));
+
     return Scaffold(
       backgroundColor: AppTheme.darkBlue,
       appBar: AppBar(
@@ -129,7 +133,7 @@ class StaffSignUpState extends ConsumerState<StaffSignUp> {
                 text: 'Confirm',
                 buttonColor: AppTheme.blue2,
                 onTapButton: () {
-                  signDataT.when(
+                  signUpData.when(
                       data: (signUpData) {
                         Navigator.push(
                             context,
