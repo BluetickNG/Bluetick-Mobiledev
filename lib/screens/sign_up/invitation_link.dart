@@ -117,8 +117,6 @@ class InvitationLinkState extends ConsumerState<StaffSignUp> {
                 invDataT.when(
                     loading: () => CircularProgressIndicator(),
                     data: (invSSdata) {
-                      final invpostrequest = SignUpController()
-                          .postData(invSSdata);
                       Navigator.pushReplacement(context,
                           MaterialPageRoute(settings: RouteSettings(arguments: invSSdata),
                             builder: (_) {
