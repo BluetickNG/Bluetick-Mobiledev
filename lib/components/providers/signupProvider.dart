@@ -6,7 +6,7 @@ import '../services/signupservices.dart';
 
 
 final invitationProvider =
-FutureProvider.family((ref, Map<String, String> value) {
+FutureProvider.autoDispose.family((ref, Map<String, String> value) {
   final invTData = InvSignUpServices.fromJson(value);
   invSignUpController().postData(invTData);
   return invTData;

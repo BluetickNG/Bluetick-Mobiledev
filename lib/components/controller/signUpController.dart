@@ -46,7 +46,6 @@ class invSignUpController {
 }
 class SignUpController {
 
-  //SignUpController();
 
   Future postData(signUpData) async {
     try {

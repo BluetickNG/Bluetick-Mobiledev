@@ -8,7 +8,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../components/widgets/widgets.dart';
 import 'staff_sign_up.dart';
 
-final loadProvider = StateProvider((ref) => false);
+final loadProvider = StateProvider.autoDispose((ref) => false);
 
 class InvitationLink extends ConsumerStatefulWidget {
   @override
