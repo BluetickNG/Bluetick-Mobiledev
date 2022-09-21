@@ -8,6 +8,8 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../components/widgets/widgets.dart';
 import 'staff_sign_up.dart';
 
+final loadProvider = StateProvider((ref) => false);
+
 class InvitationLink extends ConsumerStatefulWidget {
   @override
   ConsumerState<ConsumerStatefulWidget> createState() {
@@ -28,9 +30,8 @@ class InvitationLinkState extends ConsumerState<StaffSignUp> {
 
   @override
   Widget build(BuildContext context) {
-
     Map<String, String>? invMap;
-
+    final isLoading = ref.watch(loadProvider);
     final invitationtextfield = GeneralTextField(
       hintText: 'Invitation link',
       textType: TextInputType.name,
@@ -102,30 +103,44 @@ class InvitationLinkState extends ConsumerState<StaffSignUp> {
                     ),
                   )
                 ])),
-            SignUpButton(
-              textColor: AppTheme.mainBlue,
-              text: 'Continue',
-              buttonColor: AppTheme.blue2,
-              onTapButton: () {
-                invMap = {'email': emailcontroller.text, 'link': invitationcontroller.text};
-                final invDataT =ref.watch(invitationProvider(invMap!));
+            isLoading
+                ? Container(
+                    margin: const EdgeInsets.symmetric(vertical: 33),
+                    height: 35,
+                    width: 35,
+                    child: const CircularProgressIndicator())
+                : SignUpButton(
+                    textColor: AppTheme.mainBlue,
+                    text: 'Continue',
+                    buttonColor: AppTheme.blue2,
+                    onTapButton: () {
+                      invMap = {
+                        'email': emailcontroller.text,
+                        'link': invitationcontroller.text
+                      };
+                      final invDataT = ref.watch(invitationProvider(invMap!));
 
-                invDataT.when(
-                    loading: () => CircularProgressIndicator(),
-                    data: (invSSdata) {
-                      Navigator.pushReplacement(context,
-                          MaterialPageRoute(settings: RouteSettings(arguments: invSSdata),
-                            builder: (_) {
-                        return StaffSignUp();
-                      },
-                          ));
-                       //or ref.watch value
+                      invDataT.when(loading: () {
+                        ref.read(loadProvider.notifier).state = true;
+                      }, data: (invSSdata) {
+                        Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              settings: RouteSettings(arguments: invSSdata),
+                              builder: (_) {
+                                return StaffSignUp();
+                              },
+                            ));
+                        //or ref.watch value
+                      }, error: (Object error, StackTrace? stackTrace) {
+                        return SnackBar(
+                          backgroundColor: AppTheme.mainBlue,
+                          duration: Duration(seconds: 4),
+                          content: Text('Failed'),
+                        );
+                      });
                     },
-                    error: (Object error, StackTrace? stackTrace) {
-                      return SnackBar(content: Text('Failed'),);
-                    });
-              },
-            ),
+                  ),
           ],
         ),
       ),
