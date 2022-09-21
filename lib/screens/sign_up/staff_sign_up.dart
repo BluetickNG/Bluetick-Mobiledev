@@ -13,6 +13,8 @@ import '../../components/providers/signupProvider.dart';
 import '../../components/widgets/widgets.dart';
 import '../home/co_wokers/co_wokers_home_tab.dart';
 
+final loadProvider = StateProvider((ref) => false);
+
 class StaffSignUp extends ConsumerStatefulWidget {
   @override
   ConsumerState<ConsumerStatefulWidget> createState() {
@@ -40,7 +42,7 @@ class StaffSignUpState extends ConsumerState<StaffSignUp> {
     final invData =
         ModalRoute.of(context)!.settings.arguments as InvSignUpServices;
     late final signUpMap;
-
+    final isLoading = ref.watch(loadProvider);
     return Scaffold(
       backgroundColor: AppTheme.darkBlue,
       appBar: AppBar(
@@ -121,31 +123,36 @@ class StaffSignUpState extends ConsumerState<StaffSignUp> {
               const SizedBox(
                 height: 25,
               ),
-              SignUpButton(
-                  textColor: AppTheme.mainBlue,
-                  text: 'Confirm',
-                  buttonColor: AppTheme.blue2,
-                  onTapButton: () {
-                    signUpMap = {
-                      'email': invData.email,
-                      'fullname': fullnameController.text,
-                      'role': roleController.text,
-                      'password1': passwordController.text,
-                      'password2': confirmPasswordController.text
-                    };
-                    final signUpData = ref.watch(signUpProvider(signUpMap));
+              isLoading
+                  ? Container(child: CircularProgressIndicator())
+                  : SignUpButton(
+                      textColor: AppTheme.mainBlue,
+                      text: 'Confirm',
+                      buttonColor: AppTheme.blue2,
+                      onTapButton: () {
+                        signUpMap = {
+                          'email': invData.email,
+                          'fullname': fullnameController.text,
+                          'role': roleController.text,
+                          'password1': passwordController.text,
+                          'password2': confirmPasswordController.text
+                        };
+                        final signUpData = ref.watch(signUpProvider(signUpMap));
 
-                    signUpData.when(
-                        data: (signUpData) {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => const CoWorkerHomeTab(),
-                              ));
-                        },
-                        error: (Object error, StackTrace? stacktrace) {},
-                        loading: () => CircularProgressIndicator());
-                  }),
+                        signUpData.when(
+                          data: (signUpData) {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const CoWorkerHomeTab(),
+                                ));
+                          },
+                          error: (Object error, StackTrace? stacktrace) {},
+                          loading: () {
+                            ref.read(loadProvider.notifier).state = true;
+                          },
+                        );
+                      })
             ],
           ),
         ),
