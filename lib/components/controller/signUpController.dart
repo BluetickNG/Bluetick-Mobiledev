@@ -16,19 +16,19 @@ class invSignUpController {
     try {
       Request request =
       http.Request('POST', Uri.parse('${BASE_URL}/signemail'));
-      final InvService = InvSignUpServices(invData.email, invData.link);
+      final invService = InvSignUpServices(invData.email, invData.link);
 
-      request.body = '${InvService.toJson()}';
-
+      request.body = '${invService.toJson()}';
       http.StreamedResponse response = await request.send();
+      await Future.delayed(const Duration(seconds: 1));
 
       if (response.statusCode == 200) {
-        return 'success';
+        return;
       } else {
-        ////
+        throw Exception();
       }
-    } on Exception catch (e) {
-      print(e);
+    } on Exception catch (error) {
+      return error;
     }
   }
 
@@ -60,10 +60,10 @@ class SignUpController {
       if (response.statusCode == 200) {
         return 'success';
       } else {
-        ////
+        throw Exception(response.reasonPhrase);
       }
     } on Exception catch (e) {
-      print(e);
+      return e;
     }
   }
 

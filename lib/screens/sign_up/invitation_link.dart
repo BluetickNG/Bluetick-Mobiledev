@@ -28,11 +28,8 @@ class InvitationLinkState extends ConsumerState<StaffSignUp> {
 
   @override
   Widget build(BuildContext context) {
-    final invData = {
-      'link': invitationcontroller.text,
-      'email': emailcontroller.text
-    };
-    final invDataT = ref.watch(invitationProvider(invData));
+
+    Map<String, String>? invMap;
 
     final invitationtextfield = GeneralTextField(
       hintText: 'Invitation link',
@@ -110,6 +107,9 @@ class InvitationLinkState extends ConsumerState<StaffSignUp> {
               text: 'Continue',
               buttonColor: AppTheme.blue2,
               onTapButton: () {
+                invMap = {'email': emailcontroller.text, 'link': invitationcontroller.text};
+                final invDataT =ref.watch(invitationProvider(invMap!));
+
                 invDataT.when(
                     loading: () => CircularProgressIndicator(),
                     data: (invSSdata) {

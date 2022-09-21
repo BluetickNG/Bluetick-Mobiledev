@@ -37,16 +37,9 @@ class StaffSignUpState extends ConsumerState<StaffSignUp> {
 
   @override
   Widget build(BuildContext context) {
-
     final invData =
         ModalRoute.of(context)!.settings.arguments as InvSignUpServices;
-    final signUpData = ref.watch(signUpProvider({
-    'email': invData.email,
-    'fullname': fullnameController.text,
-    'role': roleController.text,
-    'password1': passwordController.text,
-      'password2': confirmPasswordController.text
-    }));
+    late final signUpMap;
 
     return Scaffold(
       backgroundColor: AppTheme.darkBlue,
@@ -129,20 +122,30 @@ class StaffSignUpState extends ConsumerState<StaffSignUp> {
                 height: 25,
               ),
               SignUpButton(
-                textColor: AppTheme.mainBlue,
-                text: 'Confirm',
-                buttonColor: AppTheme.blue2,
-                onTapButton: () {
-                  signUpData.when(
-                      data: (signUpData) {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const CoWorkerHomeTab(),));},
-                            error: (Object error, StackTrace? stacktrace) {},
-                            loading: () => CircularProgressIndicator());
-                      }
-                  ),
+                  textColor: AppTheme.mainBlue,
+                  text: 'Confirm',
+                  buttonColor: AppTheme.blue2,
+                  onTapButton: () {
+                    signUpMap = {
+                      'email': invData.email,
+                      'fullname': fullnameController.text,
+                      'role': roleController.text,
+                      'password1': passwordController.text,
+                      'password2': confirmPasswordController.text
+                    };
+                    final signUpData = ref.watch(signUpProvider(signUpMap));
+
+                    signUpData.when(
+                        data: (signUpData) {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const CoWorkerHomeTab(),
+                              ));
+                        },
+                        error: (Object error, StackTrace? stacktrace) {},
+                        loading: () => CircularProgressIndicator());
+                  }),
             ],
           ),
         ),
