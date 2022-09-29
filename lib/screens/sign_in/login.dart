@@ -1,17 +1,35 @@
-import 'package:bluetick/screens/home/home_tabs.dart';
+import 'dart:developer';
+
+import 'package:bluetick/components/constants/app_router/app_router.dart';
+import 'package:bluetick/components/constants/extensions/validation_extension.dart';
+import 'package:bluetick/components/services/api_models/error_model.dart';
+import 'package:bluetick/components/services/api_models/login.dart';
+import 'package:bluetick/components/widgets/dialogs.dart';
 import 'package:bluetick/screens/sign_up/admin_sign_up.dart';
 import 'package:bluetick/components/app_theme.dart';
 import "package:flutter/material.dart";
-import 'package:flutter/services.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import '../../components/config/config_sheet.dart';
+import '../../components/services/api_models/login_response.dart';
+import '../../components/services/providers.dart';
 import '../../components/widgets/widgets.dart';
 import '../sign_up/invitation_link.dart';
 
-class LoginScreen extends StatelessWidget {
-  const LoginScreen({Key? key}) : super(key: key);
+class LoginScreen extends HookConsumerWidget {
+  LoginScreen({Key? key}) : super(key: key);
+  final _formKey = GlobalKey<FormState>();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final emailController = useTextEditingController();
+    final passwordController = useTextEditingController();
+
+    ///Declaring provider that was used
+    final notifier = ref.read(logInProvider.notifier);
+    final state = ref.watch(logInProvider);
+
     return Scaffold(
       resizeToAvoidBottomInset: false,
       body: SafeArea(
@@ -22,39 +40,104 @@ class LoginScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Form(
-                //    key: _formKey,
+                key: _formKey,
                 child: Padding(
                   padding: const EdgeInsets.all(30),
                   child: Column(
                     children: [
-                      const Padding(
-                        padding: EdgeInsets.only(top: 200),
+                      Hero(
+                        tag: 'login',
+                        child: Image.asset('Assets/BTlogo.png'),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(top: 100),
                         child: GeneralTextField(
+                          controller: emailController,
                           textType: TextInputType.emailAddress,
                           hintText: 'Email Address',
+                          validator: context.validateEmailAddress,
                         ),
                       ),
                       Padding(
                           padding: const EdgeInsets.only(top: 20),
                           child: GeneralPasswordTextField(
+                              validator: context.validatePassword,
+                              controller: passwordController,
                               hintText: 'Password',
                               textType: TextInputType.visiblePassword,
                               showPassword: true)),
-                      Padding(
-                        padding: const EdgeInsets.only(top: 100),
-                        child: SignUpButton(
-                          onTapButton: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => const HomeTab(),
+                      SizedBox(
+                        height: 11,
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          GestureDetector(
+                            child: Text(
+                              'Forgot Password',
+                              style: GoogleFonts.montserrat(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w700,
+                                color: AppTheme.mainBlue,
                               ),
-                            );
-                          },
-                          buttonColor: AppTheme.mainBlue,
-                          text: 'Sign in',
-                          textColor: AppTheme.white,
-                        ),
+                            ),
+                            onTap: () {
+                              Navigator.pushNamed(
+                                  context, AppRouter.forgotPassword);
+                            },
+                          ),
+                        ],
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(top: 78),
+                        child: state.isLoading
+                            ? Center(
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: mainBlue,
+                                  valueColor: AlwaysStoppedAnimation(
+                                      mainBlue.withOpacity(0.8)),
+                                  backgroundColor: Colors.transparent,
+                                ),
+                              )
+                            : SignUpButton(
+                                onTapButton: () async {
+                                  ref.read(emailProvider.notifier).state =
+                                      emailController.text;
+                                  ref.read(passwordProvider.notifier).state =
+                                      passwordController.text;
+                                  if (_formKey.currentState!.validate()) {
+                                    Login login = Login(
+                                        email: emailController.text,
+                                        password: passwordController.text);
+
+                                    var result =
+                                        await notifier.loginRequest(login);
+
+                                    if (result.isLeft) {
+                                      ErrorModel errorMessage = result.left;
+
+                                      showSnackBar(context,
+                                          errorMessage.message!['message']);
+                                      print(
+                                          'Error from login request ${errorMessage.message!['message']}');
+                                    } else {
+                                      LoginResponse login = result.right;
+                                      showSnackBar(context, login.message!);
+                                      ref
+                                          .read(workspaceProvider.notifier)
+                                          .state = login.workspacename!;
+                                      log('workspace name from login is ${ref.read(workspaceProvider.notifier).state}');
+                                      Navigator.pushNamed(
+                                          context, AppRouter.homeTabs);
+                                    }
+                                  }
+                                  passwordController.clear();
+                                },
+                                buttonColor: AppTheme.mainBlue,
+                                text: 'Sign in',
+                                textColor: AppTheme.white,
+                              ),
                       ),
                       Container(
                           padding: const EdgeInsets.only(top: 50, bottom: 10),
@@ -92,7 +175,7 @@ class LoginScreen extends StatelessWidget {
                             onTap: () => Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (_) => const AdminSignUp(),
+                                builder: (_) => AdminSignUp(),
                               ),
                             ),
                             child: Text(

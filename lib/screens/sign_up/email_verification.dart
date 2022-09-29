@@ -1,34 +1,83 @@
 import 'package:bluetick/components/app_theme.dart';
 import 'package:bluetick/components/config/config_sheet.dart';
+import 'package:bluetick/components/services/api_models/error_model.dart';
+import 'package:bluetick/components/services/api_models/verify_workspacebody.dart';
+import 'package:bluetick/components/services/api_models/verify_workspaceresponse.dart';
+import 'package:bluetick/components/services/providers.dart';
+import 'package:bluetick/components/widgets/dialogs.dart';
+import 'package:bluetick/components/widgets/verifyInputField.dart';
 import 'package:bluetick/screens/home/home_tabs.dart';
-import 'package:bluetick/screens/sign_in/login.dart';
+import 'package:bluetick/screens/sign_up/new_password.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../components/widgets/widgets.dart';
 
-final otpController = TextEditingController();
+class EmailVerification extends ConsumerStatefulWidget {
+  //emailp - email from forgotpassword screen
+  final String? emailp;
 
-class EmailVerification extends StatelessWidget {
-  const EmailVerification({Key? key}) : super(key: key);
+  //emailw - email from adminsignup screen
+  final String? emailw;
+
+  final bool? check;
+  EmailVerification({Key? key, this.emailp, this.emailw, this.check})
+      : super(key: key);
+
+  @override
+  _RiverpodEmailVerificationState createState() =>
+      _RiverpodEmailVerificationState();
+}
+
+class _RiverpodEmailVerificationState extends ConsumerState<EmailVerification> {
+  late final TextEditingController otpController1;
+  late final TextEditingController otpController2;
+  late final TextEditingController otpController3;
+  late final TextEditingController otpController4;
+  late final TextEditingController otpController5;
+  late final TextEditingController otpController6;
+
+  @override
+  void initState() {
+    otpController1 = TextEditingController();
+    otpController2 = TextEditingController();
+    otpController3 = TextEditingController();
+    otpController4 = TextEditingController();
+    otpController5 = TextEditingController();
+    otpController6 = TextEditingController();
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    otpController1.dispose();
+    otpController2.dispose();
+    otpController3.dispose();
+    otpController4.dispose();
+    otpController5.dispose();
+    otpController6.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
+    final _formkey = GlobalKey<FormState>();
+    final notifier = ref.read(verifyWorkspaceProvider.notifier);
+    final state = ref.watch(verifyWorkspaceProvider);
+    final notifier2 = ref.read(verifyPasswordProvider.notifier);
+    final state2 = ref.watch(verifyPasswordProvider);
     return Scaffold(
       backgroundColor: AppTheme.offWhite,
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Colors.transparent,
         leading: BackButton(
-          color: darkBlue,
-          onPressed: () => Navigator.push(
-              context, MaterialPageRoute(builder: (context) => LoginScreen())),
-        ),
+            color: darkBlue, onPressed: () => Navigator.pop(context)),
       ),
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 50),
+          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -45,41 +94,152 @@ class EmailVerification extends StatelessWidget {
               const SizedBox(
                 height: 20,
               ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  InputField(),
-                  InputField(),
-                  InputField(),
-                  InputField(),
-                  InputField(),
-                  InputField(),
-                ],
-              ),
-              const SizedBox(
-                height: 38,
-              ),
-              Center(
-                child: SignUpButton(
-                  text: 'Confirm',
-                  textColor: AppTheme.white,
-                  buttonColor: mainBlue,
-                  onTapButton: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => HomeTab(),
-                      ),
-                    );
-                  },
+              Form(
+                key: _formkey,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    VeryInputField(controller: otpController1),
+                    VeryInputField(controller: otpController2),
+                    VeryInputField(controller: otpController3),
+                    VeryInputField(controller: otpController4),
+                    VeryInputField(controller: otpController5),
+                    VeryInputField(controller: otpController6),
+                  ],
                 ),
               ),
+              Padding(
+                padding: const EdgeInsets.only(top: 18.0),
+                child: widget.check!
+                    ? state2.isLoading
+                        ? Center(
+                            child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: mainBlue,
+                            valueColor: AlwaysStoppedAnimation(
+                                mainBlue.withOpacity(0.8)),
+                            backgroundColor: Colors.transparent,
+                          ))
+                        : Center(
+                            child: SignUpButton(
+                              text: 'Confirm',
+                              textColor: AppTheme.white,
+                              buttonColor: mainBlue,
+                              onTapButton: () async {
+                                if (_formkey.currentState!.validate()) {
+                                  String otp = otpController1.text +
+                                      otpController2.text +
+                                      otpController3.text +
+                                      otpController4.text +
+                                      otpController5.text +
+                                      otpController6.text;
+                                  int tokin = int.parse(otp);
+                                  // print(tokin);
+                                  // print(emailp);
+                                  VerifyWorkspacebody verifyWorkspacebody =
+                                      VerifyWorkspacebody(
+                                          token: tokin, email: widget.emailp);
+                                  var res =
+                                      await notifier2.verifyPasswordrequest(
+                                          verifyWorkspacebody);
+                                  if (res.isLeft) {
+                                    ErrorModel errorModel = res.left;
+                                    showSnackBar(
+                                        context,
+                                        errorModel.message!['message'] +
+                                            '. Or re-enter your token');
+                                  } else {
+                                    VerifyWorkspaceresponse
+                                        verifyWorkspaceresponse = res.right;
+                                    showSnackBar(context,
+                                        verifyWorkspaceresponse.message!);
+                                    await Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) => NewPassword(
+                                          email: widget.emailp,
+                                        ),
+                                      ),
+                                    );
+                                  }
+                                  otpController1.clear();
+                                  otpController2.clear();
+                                  otpController3.clear();
+                                  otpController4.clear();
+                                  otpController5.clear();
+                                  otpController6.clear();
+                                  // print(tokenOtp.runtimeType);
+                                }
+                              },
+                            ),
+                          )
+                    : state.isLoading
+                        ? Center(
+                            child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: mainBlue,
+                            valueColor: AlwaysStoppedAnimation(
+                                mainBlue.withOpacity(0.8)),
+                            backgroundColor: Colors.transparent,
+                          ))
+                        : Center(
+                            child: SignUpButton(
+                              text: 'Confirm',
+                              textColor: AppTheme.white,
+                              buttonColor: mainBlue,
+                              onTapButton: () async {
+                                if (_formkey.currentState!.validate()) {
+                                  String otp = otpController1.text +
+                                      otpController2.text +
+                                      otpController3.text +
+                                      otpController4.text +
+                                      otpController5.text +
+                                      otpController6.text;
+                                  int tokin = int.parse(otp);
+                                  // print(tokin);
+                                  // print(widget.emailw);
+                                  VerifyWorkspacebody verifyWorkspacebody =
+                                      VerifyWorkspacebody(
+                                          token: tokin, email: widget.emailw);
+                                  var res =
+                                      await notifier.verifyWorkspacerequest(
+                                          verifyWorkspacebody);
+                                  if (res.isLeft) {
+                                    ErrorModel errorModel = res.left;
+                                    showSnackBar(
+                                        context,
+                                        errorModel.message!['message'] +
+                                            '. Or re-enter your token');
+                                  } else {
+                                    VerifyWorkspaceresponse
+                                        verifyWorkspaceresponse = res.right;
+                                    showSnackBar(context,
+                                        verifyWorkspaceresponse.message!);
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) => HomeTab(),
+                                      ),
+                                    );
+                                  }
+                                  otpController1.clear();
+                                  otpController2.clear();
+                                  otpController3.clear();
+                                  otpController4.clear();
+                                  otpController5.clear();
+                                  otpController6.clear();
+                                  // print(tokenOtp.runtimeType);
+                                }
+                              },
+                            ),
+                          ),
+              ),
               const SizedBox(
-                height: 115,
+                height: 30, //115,
               ),
               Center(
                 child: Text(
-                  'Expired Code or Didn’t Receive?',
+                  'Expired Code or Didn\'t Receive?',
                   style: GoogleFonts.montserrat(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
@@ -110,59 +270,6 @@ class EmailVerification extends StatelessWidget {
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  Container InputField() {
-    return Container(
-      height: 48,
-      width: 48,
-      decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(8),
-          color: Colors.white,
-          border: Border.all(
-            width: 2,
-            color: AppTheme.darkBlue,
-          ),
-          boxShadow: [
-            BoxShadow(
-              offset: const Offset(0, 6),
-              blurRadius: 12,
-              color: Color.fromRGBO(22, 40, 80, 0.4),
-            ),
-          ]),
-      alignment: Alignment.center,
-      child: Center(
-        child: Builder(builder: (context) {
-          return TextField(
-            //   controller: otpController,
-            onChanged: (val) {
-              if (val.length == 1) {
-                FocusScope.of(context).nextFocus();
-              }
-            },
-            autofocus: true,
-
-            onSubmitted: (val) {
-              print(
-                  'The value of the pin is $val...and controller is ${otpController.text}');
-            },
-            keyboardType: TextInputType.number,
-            textAlign: TextAlign.center,
-            cursorColor: AppTheme.darkBlue,
-            style: TextStyle(fontSize: 20),
-            inputFormatters: [
-              LengthLimitingTextInputFormatter(1),
-              FilteringTextInputFormatter.digitsOnly
-            ],
-            decoration: InputDecoration(
-              helperMaxLines: 1,
-              errorMaxLines: 1,
-              hintMaxLines: 1,
-            ),
-          );
-        }),
       ),
     );
   }

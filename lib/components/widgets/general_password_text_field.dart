@@ -1,15 +1,20 @@
 import 'package:bluetick/components/app_theme.dart';
+import 'package:bluetick/components/config/config_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class GeneralPasswordTextField extends StatefulWidget {
   final String hintText;
   final TextInputType textType;
+  final TextEditingController controller;
   bool showPassword = false;
+  String? Function(String?)? validator;
   GeneralPasswordTextField({
     Key? key,
     required this.hintText,
+    required this.controller,
     required this.textType,
+    this.validator,
     required this.showPassword,
   }) : super(key: key);
 
@@ -21,7 +26,9 @@ class GeneralPasswordTextField extends StatefulWidget {
 class _GeneralPasswordTextFieldState extends State<GeneralPasswordTextField> {
   @override
   Widget build(BuildContext context) {
-    return TextField(
+    return TextFormField(
+      validator: widget.validator,
+      controller: widget.controller,
       keyboardType: widget.textType,
       obscureText: widget.showPassword,
       decoration: InputDecoration(
@@ -65,6 +72,13 @@ class _GeneralPasswordTextFieldState extends State<GeneralPasswordTextField> {
           borderRadius: BorderRadius.circular(8),
           borderSide: const BorderSide(
             color: AppTheme.mainBlue,
+            width: 2,
+          ),
+        ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(
+            color: warningRed,
             width: 2,
           ),
         ),

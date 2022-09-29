@@ -1,9 +1,14 @@
+import 'package:bluetick/components/constants/app_router/app_router.dart';
+import 'package:bluetick/components/constants/extensions/notification_extension.dart';
+import 'package:bluetick/screens/home/home.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:responsive_framework/responsive_framework.dart';
-import 'screens/sign_up/splash_screen.dart';
 
 void main() {
-  runApp(const MyApp());
+  WidgetsFlutterBinding.ensureInitialized();
+  NotificationExtension().initNotification();
+  runApp(ProviderScope(child: const MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -22,12 +27,19 @@ class MyApp extends StatelessWidget {
             ResponsiveBreakpoint.autoScale(1000, name: 'LARGESCREEN'),
             ResponsiveBreakpoint.resize(1200, name: 'EXTRALARGESCREEN'),
           ]),
+      title: 'BlueTick',
       debugShowCheckedModeBanner: false,
-      title: 'Flutter Demo',
       theme: ThemeData(
         primarySwatch: Colors.blue,
+        splashColor: Colors.transparent,
+        highlightColor: Colors.transparent,
+        hoverColor: Colors.transparent,
       ),
-      home: const SplashScreen(),
+      initialRoute: AppRouter.splashScreen,
+      routes: AppRouter.routes,
+      onGenerateRoute: AppRouter.generateRoute,
+
+      //   home: HomeScreen() //const SplashScreen(),
     );
   }
 }

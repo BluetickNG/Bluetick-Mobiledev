@@ -1,10 +1,9 @@
-import 'package:bluetick/screens/home/home_tabs.dart';
+import 'package:bluetick/components/constants/app_router/app_router.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../components/app_theme.dart';
 import '../../../components/config/config_sheet.dart';
-import '../../../components/ui/ui_utils.dart';
 import 'live_location.dart';
 
 class StaffProfileAdmin extends StatelessWidget {
@@ -56,7 +55,9 @@ class StaffProfileAdmin extends StatelessWidget {
                           border: Border.all(color: Colors.black),
                           shape: BoxShape.circle),
                       child: IconButton(
-                          onPressed: () => null,
+                          onPressed: () {
+                            Navigator.pushNamed(context, AppRouter.chatScreen);
+                          },
                           icon: const ImageIcon(
                               AssetImage('Assets/message.png'))),
                     )),
@@ -105,7 +106,12 @@ class StaffProfileAdmin extends StatelessWidget {
                   right: 1,
                   child: IconButton(
                     color: Colors.black,
-                    onPressed: () => null,
+                    onPressed: () {
+                      Navigator.pushNamed(
+                        context,
+                        AppRouter.coWorkersCallScreen,
+                      );
+                    },
                     icon: const Icon(Icons.phone),
                   ),
                 ),
