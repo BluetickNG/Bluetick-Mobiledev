@@ -65,7 +65,7 @@ class LoginScreen extends HookConsumerWidget {
                               controller: passwordController,
                               hintText: 'Password',
                               textType: TextInputType.visiblePassword,
-                              showPassword: true)),
+                              showPassword: true),),
                       SizedBox(
                         height: 11,
                       ),
