@@ -12,6 +12,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 import '../../../components/config/config_sheet.dart';
+import 'co_worker_profile.dart';
 
 class Workers extends ConsumerStatefulWidget {
   const Workers({Key? key}) : super(key: key);
@@ -27,9 +28,47 @@ class WorkersState extends ConsumerState<Workers> {
 
   bool isSearching = false;
   List<AllStaffDetail> searchedStaff = [];
+  late final TextEditingController searchController;
 
   static final customCacheManager = CacheManager(Config('customCacheKey',
       stalePeriod: const Duration(days: 15), maxNrOfCacheObjects: 100));
+
+  @override
+  void initState() {
+    super.initState();
+    searchController = TextEditingController();
+    searchController.addListener(searchStaffListener);
+  }
+
+  void searchStaffListener() {
+    if (searchController.text.trim().isNotEmpty) {
+      String searchQuery = searchController.text.trim().toLowerCase();
+
+      List<AllStaffDetail> tempList = [];
+
+      for (int i = 0; i < staffList.length; i++) {
+        final singleStaff = staffList[i];
+
+        if (singleStaff.fullname!.toLowerCase().contains(searchQuery)) {
+          tempList.add(singleStaff);
+        }
+      }
+      setState(() {
+        searchedStaff = tempList;
+        isSearching = true;
+      });
+    } else {
+      setState(() {
+        isSearching = false;
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    searchController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -79,6 +118,7 @@ class WorkersState extends ConsumerState<Workers> {
                             )),
                         title: TextField(
                             //showCursor: false,
+                            controller: searchController,
                             cursorHeight: 12,
                             style: const TextStyle(fontSize: 12),
                             decoration: InputDecoration(
@@ -132,25 +172,53 @@ class WorkersState extends ConsumerState<Workers> {
                                       ],
                                     ),
                                   )
-                                :
 
                                 ///if isearching is true
-                                isSearching
+                                : isSearching
                                     ? ListView.builder(
                                         shrinkWrap: true,
                                         itemBuilder: ((context, index) {
-                                          return Container(
-                                            width: double.infinity,
-                                            margin:
-                                                const EdgeInsets.only(top: 4),
-                                            height: 51.97,
-                                            color: AppTheme.mainBlue,
-                                            child: Padding(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                      vertical: 4,
-                                                      horizontal: 16),
+                                          return InkWell(
+                                            onTap: () {
+                                              Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (_) => WorkerScreen(
+                                                    allStaffDetail:
+                                                        searchedStaff[index],
+                                                  ),
+                                                ),
+                                              );
+                                            },
+                                            child: Container(
+                                              width: double.infinity,
+                                              margin:
+                                                  const EdgeInsets.only(top: 4),
+                                              height: 51.97,
+                                              color: AppTheme.mainBlue,
                                               child: ListTile(
+                                                leading: CachedNetworkImage(
+                                                  cacheManager:
+                                                      customCacheManager,
+                                                  key: UniqueKey(),
+                                                  imageUrl: data
+                                                      .right
+                                                      .allStaffDetails![index]
+                                                      .profileimg!,
+                                                  errorWidget:
+                                                      (context, url, error) =>
+                                                          Icon(Icons.error),
+                                                  placeholder: (context, url) =>
+                                                      CircularProgressIndicator(),
+                                                  fit: BoxFit.contain,
+                                                  imageBuilder:
+                                                      (context, imageProvider) {
+                                                    return CircleAvatar(
+                                                      backgroundImage:
+                                                          imageProvider,
+                                                    );
+                                                  },
+                                                ),
                                                 title: Text(
                                                   searchedStaff[index]
                                                       .fullname!,
@@ -160,7 +228,6 @@ class WorkersState extends ConsumerState<Workers> {
                                                     fontStyle: FontStyle.normal,
                                                     color: AppTheme.white,
                                                   ),
-                                                  textAlign: TextAlign.center,
                                                 ),
                                               ),
                                             ),
@@ -212,58 +279,70 @@ class WorkersState extends ConsumerState<Workers> {
       AsyncValue<Either<ErrorModel, GetStaffResponse>> stafflist =
           ref.watch(getStaffProvider);
       return stafflist.when(
-        data: (Either<ErrorModel, GetStaffResponse> data) => Container(
-          width: double.infinity,
-          margin: const EdgeInsets.only(bottom: 4),
-          height: 51.97,
-          color: AppTheme.mainBlue,
-          child: ListTile(
-              leading: CachedNetworkImage(
-                cacheManager: customCacheManager,
-                key: UniqueKey(),
-                imageUrl: data.right.allStaffDetails![index].profileimg!,
-                errorWidget: (context, url, error) => Icon(Icons.error),
-                placeholder: (context, url) => CircularProgressIndicator(),
-                fit: BoxFit.contain,
-                imageBuilder: (context, imageProvider) {
-                  return CircleAvatar(
-                    backgroundImage: imageProvider,
-                  );
-                },
+        data: (Either<ErrorModel, GetStaffResponse> data) => InkWell(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => WorkerScreen(
+                  allStaffDetail: searchedStaff[index],
+                ),
               ),
-              title: data.right.allStaffDetails![index].isAdmin!
-                  ? Row(
-                      children: [
-                        Text(
-                          data.right.allStaffDetails![index].fullname!,
-                          style: GoogleFonts.montserrat(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            fontStyle: FontStyle.normal,
-                            color: AppTheme.white,
-                          ),
-                        ),
-                        Text(' (Admin)',
+            );
+          },
+          child: Container(
+            width: double.infinity,
+            margin: const EdgeInsets.only(bottom: 4),
+            height: 51.97,
+            color: AppTheme.mainBlue,
+            child: ListTile(
+                leading: CachedNetworkImage(
+                  cacheManager: customCacheManager,
+                  key: UniqueKey(),
+                  imageUrl: data.right.allStaffDetails![index].profileimg!,
+                  errorWidget: (context, url, error) => Icon(Icons.error),
+                  placeholder: (context, url) => CircularProgressIndicator(),
+                  fit: BoxFit.contain,
+                  imageBuilder: (context, imageProvider) {
+                    return CircleAvatar(
+                      backgroundImage: imageProvider,
+                    );
+                  },
+                ),
+                title: data.right.allStaffDetails![index].isAdmin!
+                    ? Row(
+                        children: [
+                          Text(
+                            data.right.allStaffDetails![index].fullname!,
                             style: GoogleFonts.montserrat(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
                               fontStyle: FontStyle.normal,
                               color: AppTheme.white,
-                            ))
-                      ],
-                    )
-                  : Text(
-                      data.right.allStaffDetails![index].fullname!,
-                      style: GoogleFonts.montserrat(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        fontStyle: FontStyle.normal,
-                        color: AppTheme.white,
-                      ),
-                    )
-              // subtitle: Text(''),
-              // trailing: Text(''),
-              ),
+                            ),
+                          ),
+                          Text(' (Admin)',
+                              style: GoogleFonts.montserrat(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                fontStyle: FontStyle.normal,
+                                color: AppTheme.white,
+                              ))
+                        ],
+                      )
+                    : Text(
+                        data.right.allStaffDetails![index].fullname!,
+                        style: GoogleFonts.montserrat(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          fontStyle: FontStyle.normal,
+                          color: AppTheme.white,
+                        ),
+                      )
+                // subtitle: Text(''),
+                // trailing: Text(''),
+                ),
+          ),
         ),
         error: (Object error, StackTrace? stackTrace) => Center(
             child: Text(

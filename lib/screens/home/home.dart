@@ -226,8 +226,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                           color: AppTheme.mainBlue,
                                           child: ListTile(
                                             leading: CachedNetworkImage(
-                                              cacheManager:
-                                                  customCacheManager,
+                                              cacheManager: customCacheManager,
                                               key: UniqueKey(),
                                               imageUrl: data
                                                   .right
@@ -589,10 +588,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   fontStyle: FontStyle.normal,
                   color: AppTheme.white,
                 ),
-                textAlign: TextAlign.center,
               ),
-              // subtitle: Text(''),
-              // trailing: Text(''),
             ),
           ),
         ),
